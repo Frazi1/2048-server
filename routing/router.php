@@ -2,22 +2,25 @@
 class Router {
     private $routes = [];
 
-    public function handleReq($url, $method)
+    public function handleReq(HttpRequest $req)
     {
-        $route = array_filter($this->routes, function ($r) use ($url, $method) {
-            return $r->url === $url && $r->method === $method;
+        $url = $req->route->url;
+        $method = $req->route->method;
+        $mappings = array_filter($this->routes, function ($mapping) use ($url, $method) {
+            return $mapping->route->url === $url && $mapping->route->method === $method;
         });
-        if($route) {
-            $route[0]->callback->__invoke();
+        if($mappings) {
+            $mapping = array_shift($mappings);
+            return $mapping->handler->handleReq($req);
         } else {
             echo "not found route";
         }
     }
 
-    public function addRoute($route)
+    public function addMapping($routeMapping)
     {
-        // var_dump($route);
-        array_push($this->routes, $route);
+        // var_dump($routeMapping);
+        array_push($this->routes, $routeMapping);
         // echo var_dump($this->routes);
     }
 }
