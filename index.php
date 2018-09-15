@@ -7,14 +7,15 @@ include_once "routing/RouteMapping.php";
 include_once "routing/Route.php";
 include_once "routing/HttpRequest.php";
 
+header("Content-type: application/json");
+
 $router = new Router;
 registerRoutes($router);
-
-$route = new Route($_SERVER["PATH_INFO"], $_SERVER["REQUEST_METHOD"]);
-$req = new HttpRequest($route);
+$req = new HttpRequest($$_SERVER["REQUEST_URI"], $_SERVER["REQUEST_METHOD"], $_SERVER["QUERY_STRING"], null);
 
 $res = json_encode($router->handleReq($req));
-var_dump($res);
+echo $res;
+// var_dump($res);
 return $res;
 
 function registerRoutes(Router $router)
