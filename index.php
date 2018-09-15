@@ -1,25 +1,20 @@
 <?php
-include_once "handlers/RequestHandler.php";
-include_once "handlers/players/GetPlayersHandler.php";
+$vendorPath = "vendor";
 
-include_once "routing/Router.php";
-include_once "routing/RouteMapping.php";
-include_once "routing/Route.php";
-include_once "routing/HttpRequest.php";
+include_once "controllers/PlayerController.php";
+require "$vendorPath/altorouter/altorouter/AltoRouter.php";
 
 header("Content-type: application/json");
+$playerCtrl = new PlayerController;
 
-$router = new Router;
-registerRoutes($router);
-$req = new HttpRequest($$_SERVER["REQUEST_URI"], $_SERVER["REQUEST_METHOD"], $_SERVER["QUERY_STRING"], null);
+$router = new AltoRouter;
+$router->map('GET','/api/players', [$playerCtrl, 'getAll'] );
+$router->map('GET','/api/players/[i:id]', [$playerCtrl, 'getById']);
+$match = $router->match($_SERVER["REQUEST_URI"]);
 
-$res = json_encode($router->handleReq($req));
-echo $res;
-// var_dump($res);
-return $res;
-
-function registerRoutes(Router $router)
-{
-    $router->addMapping(new RouteMapping(new Route("/test", "GET")));
-    $router->addMapping(new RouteMapping(new Route("/api/players", "GET"), new GetPlayersHandler));
+if( $match && is_callable( $match['target'] ) ) {
+	echo json_encode(call_user_func_array( $match['target'], $match['params'] )); 
+} else {
+	// no route was matched
+	header( $_SERVER["SERVER_PROTOCOL"] . ' 404 Not Found');
 }
