@@ -19,7 +19,7 @@ class PlayerController
 
     public function add()
     {
-        $score = 0;
+        $score = self::getQueryParam("score");
         $name = self::getQueryParam("name");
         $this->playerService->add($name, $score);
     }

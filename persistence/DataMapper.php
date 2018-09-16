@@ -9,7 +9,7 @@ abstract class DataMapper {
 
     protected abstract function mapToEntity($entity);
 
-    protected final function mapToEntities($mapper, $objects) 
+    protected final function mapToEntities($objects) 
     {
         $mapped = null;
         if(is_array($objects) && is_array(reset($objects))) {

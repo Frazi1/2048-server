@@ -1,18 +1,17 @@
 <?php
 class PlayerMapper extends DataMapper
 {
-    public function __construct($db) {
+    public $gameResultMapper;
+
+    public function __construct($db, $gameResultMapper) {
         parent::__construct($db);
+        $this->gameResultMapper = $gameResultMapper;
     }
 
     public function mapToEntity($playerProps) {
-        $id = $playerProps[0];
+        $playerId = $playerProps[0];
         $name = $playerProps["name"];
-        return new Player($id, $name);
-    }
-
-    private function mapToEntitiesInternal($objects) {
-        return $this->mapToEntities(array('PlayerMapper', 'mapToPlayer'), $objects);
+        return new Player($playerId, $name);
     }
 
     public function add(Player $player)
@@ -24,6 +23,10 @@ class PlayerMapper extends DataMapper
         $st->execute([
             ':name' => $player->name
         ]);
+
+        $lastId = $this->db->lastInsertId();
+        $player->id = $lastId;
+        return $player;
     }
 
     public function getByName($name)
@@ -37,20 +40,21 @@ class PlayerMapper extends DataMapper
             ":name" => $name
         ]);
         $res = $st->fetch();
-        $mapped = $this->mapToEntitiesInternal($res);
+        if($res === false) return null;
+        $mapped = $this->mapToEntity($res);
         return $mapped;
     }
 
     public function getAll() {
         $st = $this->db->prepare(
-            "SELECT * FROM players p
-             LEFT JOIN game_results r ON p.id=r.player_id
-             "
+            "SELECT id, `name` FROM players p"
         );
         $st->execute();
-        $res = $st->fetchAll();
-        $mapped = $this->mapToEntitiesInternal($res);
-        // var_dump($res);
-        return $mapped;
+        $players = $this->mapToEntities($st->fetchAll());
+        foreach ($players as &$player) {
+            //TODO: Fix n+1
+            $player->gameResults = $this->gameResultMapper->getByPlayerId($player->id);
+        }
+        return $players;
     }
 }

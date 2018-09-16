@@ -5,17 +5,20 @@ include_once "controllers/PlayerController.php";
 require "services/PlayerService.php";
 require "$vendorPath/altorouter/altorouter/AltoRouter.php";
 require "persistence/models/Player.php";
+require "persistence/models/GameResult.php";
 require "persistence/Database.php";
 require "persistence/DataMapper.php";
 require "persistence/PlayerMapper.php";
-
+require "persistence/GameResultMapper.php";
 
 header("Content-type: application/json");
 header("Access-Control-Allow-Origin: *");
 
 $database = new Database;
-$playerMapper = new PlayerMapper($database->getConnection());
-$playerCtrl = new PlayerController(new PlayerService($playerMapper));
+$connection = $database->getConnection();
+$gameResultMapper = new GameResultMapper($connection);
+$playerMapper = new PlayerMapper($connection, $gameResultMapper);
+$playerCtrl = new PlayerController(new PlayerService($playerMapper, $gameResultMapper));
 
 
 $router = new AltoRouter;

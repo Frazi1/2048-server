@@ -2,10 +2,12 @@
 class PlayerService
 {
     public $playerMapper;
-
-    public function __construct(PlayerMapper $playerMapper)
+    public $gameResultMapper;
+    
+    public function __construct(PlayerMapper $playerMapper, GameResultMapper $gameResultMapper)
     {
         $this->playerMapper = $playerMapper;
+        $this->gameResultMapper = $gameResultMapper;
     }
     public function getAll()
     {
@@ -24,7 +26,6 @@ class PlayerService
             $player = new Player(null, $name);
             $this->playerMapper->add($player);
         }
-
-
+        $this->gameResultMapper->addByPlayerId($score, $player->id);
     }
 }
