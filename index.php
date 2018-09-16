@@ -11,10 +11,11 @@ require "persistence/PlayerMapper.php";
 
 
 header("Content-type: application/json");
+header("Access-Control-Allow-Origin: *");
 
-$playerCtrl = new PlayerController(new PlayerService);
 $database = new Database;
-DataMapper::init($database->getConnection());
+$playerMapper = new PlayerMapper($database->getConnection());
+$playerCtrl = new PlayerController(new PlayerService($playerMapper));
 
 
 $router = new AltoRouter;

@@ -1,9 +1,25 @@
 <?php
-class DataMapper {
-    public static $db;
+abstract class DataMapper {
+    public $db;
 
-    public static function init($db)
+    public function __construct($db)
     {
-        self::$db = $db;
+        $this->db = $db;
+    }
+
+    protected abstract function mapToEntity($entity);
+
+    protected final function mapToEntities($mapper, $objects) 
+    {
+        $mapped = null;
+        if(is_array($objects) && is_array(reset($objects))) {
+            $mapped = array_map(function($item) {
+                return $this->mapToEntity($item);
+            }, $objects);
+        }
+        else {
+            $mapped = $this->mapToEntity($objects);
+        }
+        return $mapped;
     }
 }
