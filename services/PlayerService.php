@@ -26,6 +26,11 @@ class PlayerService
             $player = new Player(null, $name);
             $this->playerMapper->add($player);
         }
-        $this->gameResultMapper->addByPlayerId($score, $player->id);
+        $this->gameResultMapper->add(new GameResult(null, $score, $player->id));
+    }
+
+    public function topGamesWithPlayers($top) 
+    {
+        return $this->gameResultMapper->topWithPlayers($top);
     }
 }

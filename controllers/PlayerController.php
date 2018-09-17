@@ -1,15 +1,11 @@
 <?php
-class PlayerController
+class PlayerController extends BaseController
 {
     private $playerService;
 
     public function __construct(PlayerService $playerService)
     {
         $this->playerService = $playerService;
-    }
-
-    protected static function getQueryParam($name) {
-        return $_GET[$name];
     }
 
     public function getAll()
@@ -19,8 +15,8 @@ class PlayerController
 
     public function add()
     {
-        $score = self::getQueryParam("score");
-        $name = self::getQueryParam("name");
+        $score = $this->getQueryParam("score");
+        $name = $this->getQueryParam("name");
         $this->playerService->add($name, $score);
     }
 

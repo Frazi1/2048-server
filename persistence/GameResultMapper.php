@@ -20,18 +20,44 @@ class GameResultMapper extends DataMapper {
         return $this->mapToEntities($results);
     }
 
-    public function addByPlayerId($score, $playerId) {
-        $gameResult = new GameResult(null, $score, $playerId);
+    public function add(GameResult $gameResult) {
         $st = $this->db->prepare(
             "INSERT INTO game_results
              SET score=:score, player_id=:player_id"
         );
         $st->execute(array(
-            ":score" => $score,
-            ":player_id" => $playerId
+            ":score" => $gameResult->score,
+            ":player_id" => $gameResult->playerId
         ));
 
         $gameResult = $this->db->lastInsertId();
         return $gameResult;
+    }
+
+    public function topWithPlayers($count)
+    {
+        $limitExpr = "";
+        if($count) {
+            $limitExpr = "LIMIT ".$count;
+        }
+        $st = $this->db->prepare(
+            "SELECT gr.score as score, p.name as playerName FROM game_results gr
+             LEFT JOIN players p ON p.id = gr.player_id 
+             ORDER BY gr.score DESC
+             ".$limitExpr
+        );
+
+        $st->execute();
+
+        $currentIndex = 1;
+        $objects = $st->fetchAll();
+        $res = array_map(function($item) use($currentIndex) {
+            $dto = new GameResultDto;
+            $dto->position = $currentIndex++;
+            $dto->score = $item["score"];
+            $dto->playerName = $item["playerName"];
+            return $dto;
+        }, $objects);
+        return $res;
     }
 }
